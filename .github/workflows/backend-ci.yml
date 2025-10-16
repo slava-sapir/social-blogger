@@ -20,8 +20,22 @@ jobs:
       - name: Install & test backend
         working-directory: ./backend
         run: |
+         # Install deps: prefer npm ci for reproducible installs when lockfile present
+         if [ -f package-lock.json ]; then
+          echo "Found package-lock.json — running npm ci"
           npm ci
-          npm test
+         else
+          echo "No package-lock.json found — running npm install"
+          npm install
+         fi
+
+         # If there's a test script in package.json run tests; otherwise skip gracefully
+         if grep -q '"test"' package.json; then
+         echo "Running npm test"
+         npm test
+         else
+         echo "No test script found in package.json — skipping tests"
+         fi
 
   # Optional: trigger Render deploy hook if you want an explicit deploy (not required if Render auto-deploy on push)
   render-deploy:

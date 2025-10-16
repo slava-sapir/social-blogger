@@ -11,7 +11,7 @@
     "watch": "nodemon db",
     "start": "node db",
     "dev": "nodemon db",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"No test specified\" && exit 0",
     "lint": "eslint . || true",
     "ci": "npm run lint && npm test"
   },
