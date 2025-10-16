@@ -1,0 +1,41 @@
+name: Backend CI (tests) + optional Render trigger
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  backend-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Use Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install & test backend
+        working-directory: ./backend
+        run: |
+          npm ci
+          npm test
+
+  # Optional: trigger Render deploy hook if you want an explicit deploy (not required if Render auto-deploy on push)
+  render-deploy:
+    needs: backend-ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy hook (optional)
+        env:
+          RENDER_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$RENDER_HOOK" ]; then
+            echo "No RENDER_DEPLOY_HOOK secret defined — skipping Render deploy."
+            exit 0
+          fi
+
+          echo "Calling Render deploy hook..."
+          curl -sSf -X POST "$RENDER_HOOK"
